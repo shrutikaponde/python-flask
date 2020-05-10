@@ -10,6 +10,87 @@ This example uses the [Connexion](https://github.com/zalando/connexion) library 
 ## Requirements
 Python 3.5.2+
 
+## Steps to create
+
+Create directory, to save your openapi generated code. 
+```
+mkdir python-flask
+cd python-flask
+```
+
+Create templates directory to write your controller implementation. This is the clean way to glue generated flask app code (Swagger-Codegen) to with your backend controller implementation. Download and copy templates/controller.mustache to your project directory. 
+
+If you want to write your own mustache for controller you can refer to https://github.com/OpenAPITools/openapi-generator/blob/master/modules/openapi-generator/src/main/resources/python-flask/controller.mustache and make changes as per your requirements.
+
+```
+mkdir templates
+
+```
+Download and copy templates/controller.mustache to python-flask/templates/
+
+```
+cp ~/Downloads/controller.mustache ./templates
+
+```
+Now you are ready to use openapi-generator. Copy the location of your yaml to generate code, in my case its ../openapi.yaml and exceute following command :
+
+```
+openapi-generator generate -i ../openapi.yaml -g python-flask -o . -t ./templates
+```
+
+If all is well, the directory structure must be seen as in the following:
+```
+├── Dockerfile
+├── git_push.sh
+├── openapi_server
+│   ├── controllers
+│   │   ├── default_controller.py
+│   │   ├── __init__.py
+│   │   └── security_controller_.py
+│   ├── encoder.py
+│   ├── __init__.py
+│   ├── __main__.py
+│   ├── models
+│   │   ├── base_model_.py
+│   │   ├── employee.py
+│   │   └── __init__.py
+│   ├── openapi
+│   │   └── openapi.yaml
+│   ├── test
+│   │   ├── __init__.py
+│   │   └── test_default_controller.py
+│   ├── typing_utils.py
+│   └── util.py
+├── README.md
+├── requirements.txt
+├── setup.py
+├── templates
+│   └── controller.mustache
+├── test-requirements.txt
+└── tox.ini
+```
+
+Now its a good time to implement backend controllers. All the openapi_server implementation will be stored in src/openapi_server_impl directory. We will write only controller_impl for now. So lets create src/openapi_server_impl/controller_impl directory.
+
+```
+mkdir src
+mkdir src/openapi_server_impl
+mkdir src/openapi_server_impl/controller_impl
+```
+Copy the controller you want to implement to controller_impl using naming convention mentioned in your controller.mustache. In my case it as follows:
+
+```
+cp openapi_server/controllers/default_controller.py src/openapi_server_impl/controller_impl/DefaultController_impl.py
+```
+
+Modify the DefaultController_impl.py and create a symbolic link to import openapi_server_impl as a python module.
+```
+cd openapi_server/
+ln -s ../src/openapi_server_impl/
+```
+
+You are all set to run the server and see some magic !!!
+
 ## Usage
 To run the server, please execute the following from the root directory:
 
@@ -47,3 +128,23 @@ docker build -t openapi_server .
 # starting up a container
 docker run -p 8080:8080 openapi_server
 ```
+
+## Deploy code to azure app service
+## Steps to commit code
+
+As openapi_server/openapi_server_impl with symbolic link, before commiting code delete openapi_server/openapi_server_impl and copy src/openapi_server_impl to openapi_server/ manually.
+
+```
+cp -r src/openapi_server_impl openapi_server/
+```
+
+You can add src/ to .gitignore to ignore commiting it, as same code is available in openapi_server/openapi_server_impl.
+For first commit :
+
+```
+git add .
+git commit
+git push master origin
+```
+
+
