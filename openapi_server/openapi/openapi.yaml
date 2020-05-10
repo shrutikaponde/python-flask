@@ -1,0 +1,106 @@
+openapi: 3.0.0
+info:
+  description: An API that allows users to obtain existing information of employees
+    or past info of new employees
+  title: HR API
+  version: 1.0.0
+servers:
+- url: /
+paths:
+  /employees:
+    get:
+      description: Obtain information about employees from the HR database
+      operationId: employees_get
+      parameters:
+      - description: The amount of employees returned
+        explode: true
+        in: query
+        name: bodyLimit
+        required: false
+        schema:
+          example: 15
+          maximum: 20
+          minimum: 10
+          type: integer
+        style: form
+      - description: The pages to return employees info
+        explode: true
+        in: query
+        name: pageLimit
+        required: false
+        schema:
+          example: 2
+          maximum: 5
+          minimum: 1
+          type: integer
+        style: form
+      responses:
+        "200":
+          content:
+            aplication/json:
+              schema:
+                $ref: '#/components/schemas/Employees'
+          description: Successful pull of employee info
+      x-openapi-router-controller: openapi_server.controllers.default_controller
+    post:
+      description: Creates a new employee in the database
+      operationId: employees_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Employee'
+        required: true
+      responses:
+        "200":
+          description: Successfully created a new employee
+      x-openapi-router-controller: openapi_server.controllers.default_controller
+  /employees/{id}:
+    get:
+      description: Obtain information about specific employee
+      operationId: employees_id_get
+      parameters:
+      - description: The ID of the employee
+        explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          example: 54
+          type: integer
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Employee'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/Employee'
+          description: Success
+      x-openapi-router-controller: openapi_server.controllers.default_controller
+components:
+  schemas:
+    Employees:
+      description: Array of employee info
+      items:
+        $ref: '#/components/schemas/Employee'
+      type: array
+    Employee:
+      description: Model containing employee info
+      example:
+        employee name: Ryan Pinkham
+        id: 4
+        employee title: Market Manager
+      properties:
+        id:
+          example: 4
+          type: integer
+        employee name:
+          example: Ryan Pinkham
+          type: string
+        employee title:
+          example: Market Manager
+          type: string
+      type: object
